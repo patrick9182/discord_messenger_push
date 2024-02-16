@@ -1,0 +1,8 @@
+{
+    "Config": [
+        {
+            "channelid": "channel id here",
+            "message": "message that will be sent every hour here"
+         }
+    ]
+}
