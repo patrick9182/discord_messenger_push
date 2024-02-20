@@ -1,2 +1,2 @@
 @echo off
-.\.venv\Scripts\python main.py config.json
+.\.venv\Scripts\python check_time.py config.json
