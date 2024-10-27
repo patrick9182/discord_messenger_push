@@ -1,7 +1,7 @@
-import os
 import sys
 import json
 from datetime import datetime
+import subprocess
 
 # 從命令行參數獲取 JSON 文件路徑
 if len(sys.argv) < 2:
@@ -11,16 +11,27 @@ json_file_path = sys.argv[1]
 
 # 定義執行 Python 程序的函數
 def run_python_program():
-    # 執行 Python 程序
-    print("Message sent")
-    os.system(f".\\.venv\\Scripts\\python main.py {json_file_path}")
-    
-    # 將今天的日期寫入 JSON 文件
-    with open(json_file_path, "r+", encoding="utf-8") as file:
-        data = json.load(file)
-        data["last_run_date"] = datetime.now().strftime("%Y%m%d")
-        file.seek(0)
-        json.dump(data, file, indent=4, ensure_ascii=False)
+    try:
+        # 執行 main.py
+        print("Executing main.py...")
+        result = subprocess.run(["python3", "main.py", json_file_path], check=True)
+        if result.returncode == 0:
+            print("main.py executed successfully.")
+
+            # 成功執行後更新日期
+            with open(json_file_path, "r+", encoding="utf-8") as file:
+                data = json.load(file)
+                data["last_run_date"] = datetime.now().strftime("%Y%m%d")
+                file.seek(0)
+                json.dump(data, file, indent=4, ensure_ascii=False)
+                file.truncate()
+            print("Date updated successfully.")
+        else:
+            print(f"main.py failed with return code: {result.returncode}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing main.py: {e}")
+    except Exception as e:
+        print(f"Error writing to JSON file: {e}")
 
 # 檢查是否存在上次執行日期的字段
 try:
@@ -36,8 +47,6 @@ except json.JSONDecodeError:
 
 # 獲取今天的日期
 current_date = datetime.now().strftime("%Y%m%d")
-# print("Current date:", current_date)
-# print("Last run date:", last_run_date)
 
 # 如果上次執行日期不等於今天的日期，則執行 Python 程序
 if last_run_date != current_date:
